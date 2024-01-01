@@ -3,13 +3,13 @@
 #include <unistd.h>
 #include "addressBookUserInterface.h"
 
-#define NOUNDERLINE 0   //无删除线
-#define UNDERLINE 2     //有删除线
-#define ADDCONTACTS 1   //新增联系人
-#define SEARCHCONTACTS 2   //查找联系人
-#define DELECONTACTS 3   //删除联系人
-#define CHANGECONTACTS 4   //修改联系人
-#define EXITPROCEDURE 5   //退出程序
+#define NOUNDERLINE 0   //字体正常显示
+#define UNDERLINE 2     //字体虚化显示
+#define ADDCONTACTS '1'   //新增联系人
+#define SEARCHCONTACTS '2'   //查找联系人
+#define DELECONTACTS '3'   //删除联系人
+#define CHANGECONTACTS '4'   //修改联系人
+#define EXITPROCEDURE '5'   //退出程序
 
 int print_()    //打印一行-
 {
@@ -78,7 +78,7 @@ int funcManu()      //功能菜单
     printspace(1);
     printf("\033[0;30;47m\t|   1.新增联系人   |\n");
 
-    int nums = 0;   //如果没有联系人，则无法查找、删除和修改
+    int nums = 0;   //如果没有联系人，则无法查找、删除和修改，并且功能选项虚化显示
     printf("\033[%d;30;47m\t|   2.查找联系人   |", numsIsEmpty(nums));
     printf("\t\033[1;0;0m\n");
     printf("\033[%d;30;47m\t|   3.删除联系人   |", numsIsEmpty(nums));
