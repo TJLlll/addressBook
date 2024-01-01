@@ -103,7 +103,7 @@ int illegalInputDisplay()   //输入了非法值的显示
     printf("\033[0;30;47m\t| 请输入正确的编号 |\n");
     printspace(3);
     print_();
-    sleep(1.7);
+    sleep(2);
 }
 
 int choiseFunc()    //选择功能
@@ -114,6 +114,8 @@ int choiseFunc()    //选择功能
         scanf("%c", &choise);
         if (choise < '1' || choise > '5')
         {
+            char ch = 0;
+            while (ch = getchar()!='\n');   //处理输入缓存区的垃圾字符，防止用户输入非法值
             illegalInputDisplay();
             printf("\t\033[0;0;0m\n");
             funcManu();
