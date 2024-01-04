@@ -17,6 +17,13 @@ int print_()    //打印一行-
     return 0;
 }
 
+void clearBuffer()      //处理输入缓存区的垃圾字符，防止用户输入非法值
+{
+    char ch = 0;
+    while (ch = getchar()!='\n');   
+}
+
+
 int printspace(int line)    //打印一行空格
 {
     for (int idx = 0; idx < line; idx++)
@@ -79,12 +86,9 @@ int funcManu()      //功能菜单
     printf("\033[0;30;47m\t|   1.新增联系人   |\n");
 
     int nums = 0;   //如果没有联系人，则无法查找、删除和修改，并且功能选项虚化显示
-    printf("\033[%d;30;47m\t|   2.查找联系人   |", numsIsEmpty(nums));
-    printf("\t\033[1;0;0m\n");
-    printf("\033[%d;30;47m\t|   3.删除联系人   |", numsIsEmpty(nums));
-    printf("\t\033[0;0;0m\n");  
-    printf("\033[%d;30;47m\t|   4.修改联系人   |", numsIsEmpty(nums));
-    printf("\t\033[0;0;0m\n");
+    printf("\t|\033[%d;30;47m   2.查找联系人   \033[0;30;47m|\n", numsIsEmpty(nums));
+    printf("\t|\033[%d;30;47m   3.删除联系人   \033[0;30;47m|\n", numsIsEmpty(nums));
+    printf("\t|\033[%d;30;47m   4.修改联系人   \033[0;30;47m|\n", numsIsEmpty(nums));
     printf("\033[0;30;47m\t|   5.退出通讯录   |\n");
     printspace(1);
     print_();
@@ -96,6 +100,7 @@ int funcManu()      //功能菜单
 int illegalInputDisplay()   //输入了非法值的显示
 {
     system("clear");
+    clearBuffer();
     print_();
     printspace(2);
     printf("\033[0;30;47m\t|    输入错误！    |\n");
@@ -108,14 +113,13 @@ int illegalInputDisplay()   //输入了非法值的显示
 
 int choiseFunc()    //选择功能
 {
+    int input = 0;
     char choise = 0;
     while (1)
     {
-        scanf("%c", &choise);
-        if (choise < '1' || choise > '5')
+        scanf("%d", &input);
+        if (input < 1 || input > 5)
         {
-            char ch = 0;
-            while (ch = getchar()!='\n');   //处理输入缓存区的垃圾字符，防止用户输入非法值
             illegalInputDisplay();
             printf("\t\033[0;0;0m\n");
             funcManu();
@@ -123,25 +127,25 @@ int choiseFunc()    //选择功能
         }
         else
         {
+            choise = input + '0';
             break;
         }
     }
     switch (choise)
     {
         case ADDCONTACTS:
-            
+                printf("\n--1--\n");
             break;
         case SEARCHCONTACTS:
-
+                printf("\n--2--\n");
             break;
         case DELECONTACTS:
-            
+                printf("\n--3--\n");
             break;
         case CHANGECONTACTS:
-            
+                printf("\n--4--\n");
             break;
         case EXITPROCEDURE:
-            exit(0);
-            break;    
+            exit(0);  
     }
 }
