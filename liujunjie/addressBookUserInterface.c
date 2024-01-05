@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include "addressBookUserInterface.h"
 
@@ -20,7 +21,7 @@ int print_()    //打印一行-
 void clearBuffer()      //处理输入缓存区的垃圾字符，防止用户输入非法值
 {
     char ch = 0;
-    while (ch = getchar()!='\n');   
+    while (ch = getchar() != '\n' && ch != EOF);   
 }
 
 
@@ -67,7 +68,7 @@ int PowerOnAnimation()   //开机动画
     print_();
     printf("\t\033[0;0;0m\n");
     sleep(1.5);
-
+    
     return 0;
 }
 
@@ -100,7 +101,6 @@ int funcManu()      //功能菜单
 int illegalInputDisplay()   //输入了非法值的显示
 {
     system("clear");
-    clearBuffer();
     print_();
     printspace(2);
     printf("\033[0;30;47m\t|    输入错误！    |\n");
@@ -113,6 +113,11 @@ int illegalInputDisplay()   //输入了非法值的显示
 
 int choiseFunc()    //选择功能
 {
+    #if 1
+    fflush(stdin);      //使用该函数清空缓存区无法防止播放开机动画时非法键入所产生的bug
+    #else
+    clearBuffer();      //使用该函数清空缓存区会使开机动画播放后进入阻塞状态
+    #endif
     int input = 0;
     char choise = 0;
     while (1)
