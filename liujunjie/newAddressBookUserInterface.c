@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "addressBookUserInterface.h"
+#include "newAddressBookUserInterface.h"
 
 #define NOUNDERLINE 0   //字体正常显示
 #define UNDERLINE 2     //字体虚化显示
@@ -12,25 +12,26 @@
 #define CHANGECONTACTS '4'   //修改联系人
 #define EXITPROCEDURE '5'   //退出程序
 
-int print_()    //打印一行-
-{
-    printf("\033[0;30;47m\t--------------------\n");
-    return 0;
-}
-
 void clearBuffer()      //处理输入缓存区的垃圾字符，防止用户输入非法值
 {
     char ch = 0;
     while (ch = getchar() != '\n' && ch != EOF);   
 }
 
-
 int printspace(int line)    //打印一行空格
 {
     for (int idx = 0; idx < line; idx++)
     {
-        printf("\033[0;30;47m\t|                  |\n");
+        printf("\033[0;30;47m\t|                  |");
+        printf("\t\033[0;0;0m\n");
     }
+}
+
+int print_()    //打印一行-
+{
+    printf("\033[0;30;47m\t--------------------");
+    printf("\t\033[0;0;0m\n");
+    return 0;
 }
 
 int PowerOnAnimation()   //开机动画
@@ -39,9 +40,11 @@ int PowerOnAnimation()   //开机动画
 
     print_();
     printspace(2);
-    printf("\033[0;30;47m\t|  欢迎使用通讯录  |\n");
+    printf("\033[0;30;47m\t|  欢迎使用通讯录  |");
+    printf("\t\033[0;0;0m\n");
     printspace(2);
-    printf("\033[0;30;47m\t|   加载中 。      |\n");
+    printf("\033[0;30;47m\t|   加载中 。      |");
+    printf("\t\033[0;0;0m\n");
     printspace(3);
     print_();
     printf("\033[0;0;0m\n");
@@ -50,9 +53,11 @@ int PowerOnAnimation()   //开机动画
 
     print_();
     printspace(2);
-    printf("\033[0;30;47m\t|  欢迎使用通讯录  |\n");
+    printf("\033[0;30;47m\t|  欢迎使用通讯录  |");
+    printf("\t\033[0;0;0m\n");
     printspace(2);
-    printf("\033[0;30;47m\t|   加载中 。。    |\n");
+    printf("\033[0;30;47m\t|   加载中 。。    |");
+    printf("\t\033[0;0;0m\n");
     printspace(3);
     print_();
     printf("\033[0;0;0m\n");
@@ -61,9 +66,11 @@ int PowerOnAnimation()   //开机动画
 
     print_();
     printspace(2);
-    printf("\033[0;30;47m\t|  欢迎使用通讯录  |\n");
+    printf("\033[0;30;47m\t|  欢迎使用通讯录  |");
+    printf("\t\033[0;0;0m\n");
     printspace(2);
-    printf("\033[0;30;47m\t|   加载中 。。。  |\n");
+    printf("\033[0;30;47m\t|   加载中 。。。  |");
+    printf("\t\033[0;0;0m\n");
     printspace(3);
     print_();
     printf("\t\033[0;0;0m\n");
@@ -87,16 +94,27 @@ int funcManu()      //功能菜单
     printf("\033[0;30;47m\t|   1.新增联系人   |\n");
 
     int nums = 0;   //如果没有联系人，则无法查找、删除和修改，并且功能选项虚化显示
-    printf("\t|\033[%d;30;47m   2.查找联系人   \033[0;30;47m|\n", numsIsEmpty(nums));
-    printf("\t|\033[%d;30;47m   3.删除联系人   \033[0;30;47m|\n", numsIsEmpty(nums));
-    printf("\t|\033[%d;30;47m   4.修改联系人   \033[0;30;47m|\n", numsIsEmpty(nums));
-    printf("\033[0;30;47m\t|   5.退出通讯录   |\n");
+    printf("\t|\033[%d;30;47m   2.查找联系人   \033[0;30;47m|", numsIsEmpty(nums));
+    printf("\t\033[0;0;0m\n");
+    printf("\t");
+    printf("\033[0;30;47m|");
+    printf("\033[%d;30;47m   3.删除联系人   \033[0;30;47m|", numsIsEmpty(nums));
+    printf("\t\033[0;0;0m\n");
+
+    printf("\t");
+    printf("\033[0;30;47m|");
+    printf("\033[%d;30;47m   4.修改联系人   \033[0;30;47m|", numsIsEmpty(nums));
+    printf("\t\033[0;0;0m\n");
+    printf("\033[0;30;47m\t|   5.退出通讯录   |");
+    printf("\t\033[0;0;0m\n");
     printspace(1);
     print_();
     printf("\t\033[0;0;0m\n");
 
     return 0;
 }
+
+
 
 int illegalInputDisplay()   //输入了非法值的显示
 {

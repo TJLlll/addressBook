@@ -6,8 +6,6 @@
 #define true 1
 #define false 0
 
-/* 创造新的树结点 */
-static AVLTreeNode *createBSTreeNewNode(ELEMENTTYPE val, AVLTreeNode *parent);
 /* 获取AVL结点较高的子结点 */
 static AVLTreeNode * AVLTreeNodeGetChildTaller(AVLTreeNode *node);
 /* 左旋 */
@@ -30,9 +28,8 @@ static int AVLTreeNodeIsBalanced(AVLTreeNode *node);
 static int AVLTreeNodeUpdateHeight(AVLTreeNode *node);
 /* 添加结点之后的操作 */
 static int insertNodeAfter(balanceBinarySearchTree *pBstree, AVLTreeNode *node);
-/* 按照姓名排序，依次显示信息 */
+/* 中序遍历的算法 按照姓名为树结点排序 */
 static int inOrderTravel(balanceBinarySearchTree *pBstree, AVLTreeNode *node);
-
 
 /* 队列初始化 */
 int doubleLinkListQueueInit(queue **pQueue)
@@ -99,7 +96,7 @@ int balanceBinarySearchTreeInit(balanceBinarySearchTree **pBstree, int (*compare
 }
 
 /* 创造树的新结点 */
-static AVLTreeNode *createBSTreeNewNode(ELEMENTTYPE val, AVLTreeNode *parent)
+AVLTreeNode *createBSTreeNewNode(ELEMENTTYPE val, AVLTreeNode *parent)
 {
     /* 分配根结点 */
     AVLTreeNode * newAVLNode = (AVLTreeNode *)malloc(sizeof(AVLTreeNode) * 1);
@@ -348,6 +345,7 @@ static int AVLTreeNodeIsBalanced(AVLTreeNode *node)
         return false;
     }
 }
+
 /* 添加结点之后的操作 */
 static int insertNodeAfter(balanceBinarySearchTree *pBstree, AVLTreeNode *node)
 {
@@ -433,7 +431,7 @@ int balanceBinarySearchTreeInsert(balanceBinarySearchTree *pBstree, contacts *ne
     return ON_SUCCESS;
 }
 
-/* 中序遍历：按照姓名排序，依次显示信息 */
+/* 中序遍历的算法 按照姓名为树结点排序 */
 static int inOrderTravel(balanceBinarySearchTree *pBstree, AVLTreeNode *node)
 {
     int ret = 0;
@@ -459,7 +457,11 @@ int displayAllContactInfo(balanceBinarySearchTree *pBstree)
     return ret;
 }
 
-/* 测试插入功能 */
+/* 测试插入功能 
+    balanceBinarySearchTreeInsert(dataTree, iam1);   功能：将联系人结构体放入树  参数1：树指针  参数2：结构体指针
+    displayAllContactInfo(dataTree);   功能：显示树中目前已有的全部联系人  参数1：树指针 
+*/
+#if 0
 int main(int argc, char const *argv[])
 {
     struct contacts *iam1 = (contacts*)malloc(sizeof(contacts));
@@ -495,5 +497,4 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
-
-
+#endif
