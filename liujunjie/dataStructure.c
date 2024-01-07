@@ -1,11 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "malloc.h"
 #include "dataStructure.h"
+#include "newAddressBookUserInterface.h"
+#include "keyMonitoring.h"
 
 #define true 1
 #define false 0
+#define ESC 27  //esc键的ascii码
+#define X_INITPOS 3    //光标x初始位置
+#define Y_INITPOS 10    //光标y初始位置
+#define X_POS_LOOKIN 3  //显示查看详情光标x初始位置
+#define Y_POS_LOOKIN 24 //显示查看详情光标y初始位置
+#define ENTER 10        //回车键的ascii码
 
+static int x = X_INITPOS;       //光标坐标  
+static int cont = 0;            //打印个数
+
+/* 队列初始化 */
+static int doubleLinkListQueueInit(queue **pQueue);
 /* 获取AVL结点较高的子结点 */
 static AVLTreeNode * AVLTreeNodeGetChildTaller(AVLTreeNode *node);
 /* 左旋 */
@@ -29,15 +43,27 @@ static int AVLTreeNodeUpdateHeight(AVLTreeNode *node);
 /* 添加结点之后的操作 */
 static int insertNodeAfter(balanceBinarySearchTree *pBstree, AVLTreeNode *node);
 /* 中序遍历的算法 按照姓名为树结点排序 */
-static int inOrderTravel(balanceBinarySearchTree *pBstree, AVLTreeNode *node);
+static int inOrderTravel(AVLTreeNode *root);
+/* 显示白色背景 */
+static void printBackground();
+/* 删除结点之后要做的事 */
+static int removeNodeAfter(balanceBinarySearchTree *pBstree, AVLTreeNode *node);
+/* 判断二叉搜索树度为2 */
+static int balanceBinarySearchTreeNodeHasTwochildrens(AVLTreeNode *node);
+/* 判断二叉搜索树度为1 */
+static int balanceBinarySearchTreeNodeHasOnechildren(AVLTreeNode *node);
+/* 判断二叉搜索树度为0 */
+static int balanceBinarySearchTreeNodeIsLeaf(AVLTreeNode *node);
+/* 获取当前结点的前驱结点 */
+static AVLTreeNode * bstreeNodePreDecessor(AVLTreeNode *node);
 
 /* 队列初始化 */
-int doubleLinkListQueueInit(queue **pQueue)
+static int queueInit(queue **pQueue)
 {
-    queue *list = (queue *)malloc(sizeof(queue) * 1);
-    if (list == NULL)
+    queue *list = (queue*)malloc(sizeof(queue));    
+    if (list == NULL)   
     {
-        return MALLOC_ERROR;
+        perror("malloc error");
     }
     /* 清空脏数据 */
     memset(list, 0, sizeof(queue));
@@ -59,6 +85,131 @@ int doubleLinkListQueueInit(queue **pQueue)
     return ON_SUCCESS;
 }
 
+/* 新建队列的结点 */
+static queueNode * newQueueNode(AVLTreeNode *pTreeNode)
+{
+    /* 封装结点 */
+    queueNode * newNode = (queueNode *)malloc(sizeof(queueNode) * 1);
+    if (newNode == NULL)
+    {
+        return NULL;
+    }
+    /* 清除脏数据 */
+    memset(newNode, 0, sizeof(queueNode));
+
+    newNode->data = 0;
+    newNode->next = NULL;
+
+    /* 赋值 */
+    newNode->data = pTreeNode;
+
+    /* 返回新结点 */
+    return newNode;
+}
+
+/* 入队 */
+static int queuePush(queue * pQueue, AVLTreeNode *pTreeNode)
+{
+    if (pQueue == NULL)
+    {
+        return NULL_PTR;
+    }
+    
+    /* 新建新结点封装成函数. */
+    queueNode * newNode = newQueueNode(pTreeNode);
+    if (newNode == NULL)
+    {
+        return NULL_PTR;
+    }
+    newNode->data = 0;
+    newNode->next = NULL;
+
+    newNode->data = pTreeNode;
+    
+    queueNode * travelNode = pQueue->head->next;
+    while (travelNode->next != NULL)
+    {
+        travelNode = travelNode->next;
+    }
+    
+    travelNode->data = pTreeNode;
+
+    /* 更新队列的长度 */
+    (pQueue->len)++;
+
+    return ON_SUCCESS;
+}
+
+/* 获取队头位置的数据 */
+static int queueGetHeadVal(queue * pList, ELEMENTTYPE *pVal)
+{
+    if (pList == NULL)
+    {
+        return NULL_PTR;
+    }
+    if (pVal)
+    {
+        *pVal = pList->head->data;
+    }
+    return ON_SUCCESS;
+}
+
+/* 出队 */
+static int queuePop(queue * pList) 
+{
+    if (pList == NULL)
+    {
+        return NULL_PTR;
+    }
+    queueNode * needDelNode = pList->head;
+
+    /* 释放内存 */
+    if (needDelNode != NULL)
+    {
+        free(needDelNode);
+        needDelNode = NULL;
+    }
+
+    /* 队列长度减一 */
+    (pList->len)--;
+    return ON_SUCCESS;
+}
+
+/* 队列的销毁 */
+static int queueDestroy(queue * pList)
+{
+    /* 释放队列 */
+    while (pList->len != 0)
+    {
+        if (pList == NULL)
+        {
+            return NULL_PTR;
+        }
+    
+        queueNode * travelNode = pList->head;
+        queueNode * needDelNode = NULL;
+
+        /* 释放内存 */
+        if (needDelNode != NULL)
+        {
+            free(needDelNode);
+            needDelNode = NULL;
+        }
+
+        /* 链表长度减一 */
+        (pList->len)--;
+    }
+
+    if (pList->head != NULL)
+    {
+        free(pList->head);
+        /* 指针置为NULL. */
+        pList->head = NULL;
+    }
+    return ON_SUCCESS;
+}
+
+/* 函数比较器 */
 int compareFunc(contacts *arg1, AVLTreeNode *arg2)
 {
     char *val1 = arg1->name;
@@ -432,69 +583,363 @@ int balanceBinarySearchTreeInsert(balanceBinarySearchTree *pBstree, contacts *ne
 }
 
 /* 中序遍历的算法 按照姓名为树结点排序 */
-static int inOrderTravel(balanceBinarySearchTree *pBstree, AVLTreeNode *node)
+static int inOrderTravel(AVLTreeNode *root)
 {
-    int ret = 0;
-    if (node == NULL)
+    if (root == 0)
     {
-        return ret;
+        return NULL_PTR;
     }
+    AVLTreeNode *travelNode = root;
     /* 左子树 */
-    inOrderTravel(pBstree, node->left);
+    inOrderTravel(travelNode->left);
     /* 根结点 */
-    printf("name:%s\tphoneNumer:%s\n", node->data->name, node->data->phoneNumber);
-
+    //printf("name:%s\tphoneNumer:%s\n", node->data->name, node->data->phoneNumber);
+    printThisData(travelNode);    //打印本结点的数据
     /* 右子树 */
-    inOrderTravel(pBstree, node->right);
+    inOrderTravel(travelNode->right);
     return ON_SUCCESS;
 }
 
 /* 按照姓名排序，显示所有联系人 */
 int displayAllContactInfo(balanceBinarySearchTree *pBstree)
 {
-    int ret = 0;
-    inOrderTravel(pBstree, pBstree->root);
-    return ret;
+    printBackground();
+
+    x = X_INITPOS;
+    cont = 0;
+    printf("\033[?25l");    //隐藏光标
+    inOrderTravel(pBstree->root);
+    printf("\033[0;0;0m");
+    printf("\033[?25h");    //显示光标
+
+
+    int key = 0;
+    while (1)
+    {
+        key = returnKey();
+
+        if (key == ESC || key == ENTER)
+        {
+            return ON_SUCCESS;
+        }
+        if (key == 's' || key == 'w')
+        {
+            return ON_SUCCESS;
+        }
+
+    }
 }
 
-/* 测试插入功能 
-    balanceBinarySearchTreeInsert(dataTree, iam1);   功能：将联系人结构体放入树  参数1：树指针  参数2：结构体指针
-    displayAllContactInfo(dataTree);   功能：显示树中目前已有的全部联系人  参数1：树指针 
-*/
-#if 0
-int main(int argc, char const *argv[])
+/* 根据指定的值获取二叉搜索树的结点 */
+AVLTreeNode * baseAppointValGetAVLTreeNode(balanceBinarySearchTree *pBstree, char *data)
 {
-    struct contacts *iam1 = (contacts*)malloc(sizeof(contacts));
-    struct contacts *iam2 = (contacts*)malloc(sizeof(contacts));;
-    struct contacts *iam3 = (contacts*)malloc(sizeof(contacts));;
-    balanceBinarySearchTree *dataTree;
-    balanceBinarySearchTreeInit(&dataTree, compareFunc);
+    AVLTreeNode * travelNode = pBstree->root;
 
-    // printf("输入name1\n");
-    // scanf("%s", iam1->name);
-    // printf("输入number1\n");
-    // scanf("%s", iam1->phoneNumber);    
-    // printf("输入name2\n");
-    // scanf("%s", iam2->name);
-    // printf("输入number2\n");
-    // scanf("%s", iam2->phoneNumber);
+    int cmp = 0;
+    while (travelNode != NULL)
+    {
+        /* 比较大小 */
+        cmp = strcmp(data, travelNode->data->name);
+        if (cmp < 0)
+        {
+            travelNode = travelNode->left;
+        }
+        else if (cmp > 0)
+        {
+            travelNode = travelNode->right;
+        }
+        else
+        {
+            /* 找到了. */
+            return travelNode;
+        }
+    }
 
-    strcpy(iam1->name, "1");
-    strcpy(iam1->phoneNumber, "11111");     
-
-    strcpy(iam2->name, "2");
-    strcpy(iam2->phoneNumber, "22222");
-
-    strcpy(iam3->name, "3");
-    strcpy(iam3->phoneNumber, "33333");
-
-
-    balanceBinarySearchTreeInsert(dataTree, iam1); 
-    balanceBinarySearchTreeInsert(dataTree, iam2); 
-    balanceBinarySearchTreeInsert(dataTree, iam3); 
-    
-    displayAllContactInfo(dataTree);
-
-    return 0;
+    travelNode = pBstree->root;
+    while (travelNode != NULL)
+    {
+        /* 比较大小 */
+        cmp = strcmp(data, travelNode->data->phoneNumber);
+        if (cmp < 0)
+        {
+            travelNode = travelNode->left;
+        }
+        else if (cmp > 0)
+        {
+            travelNode = travelNode->right;
+        }
+        else
+        {
+            /* 找到了. */
+            return travelNode;
+        }
+    }
+    return NULL;
 }
-#endif
+
+/* 显示白色背景 */
+static void printBackground()
+{
+    printf("\033[0;0;0m\n");      
+    system("clear");    //清屏
+    print_();
+    printspace(9);          //显示白色底板
+    print_();
+    printf("            (请按s键翻页)\n      (按ESC或回车键返回上一级)\n");
+}
+
+
+/* 打印本结点的数据 */
+void printThisData(AVLTreeNode *node)
+{
+    int y = Y_INITPOS;
+    printf("\033[%d;10H\033[0;30;47m", x + cont);   //设置光标位置显示“姓名”
+    printf("\033[3;30;47m姓名：");
+    printf("\033[0;30;47m %s   ", node->data->name);
+    //printf("\033[3;24H");
+    //printf("\033[3;37;40m详情");        //选择这个
+    //printf("\n\t\033[0;30;47m|\033[2;30;47m     ˉˉˉˉˉˉˉˉˉˉˉˉ \033[0;30;47m|\033[0;0;0m\n");
+
+     printf("\033[%d;10H\033[0;30;47m", x + cont + 1);   //设置光标位置显示“号码”
+    printf("\033[3;30;47m号码：");
+    printf("\033[0;30;47m %s   ", node->data->phoneNumber);
+   // printf("\n\t\033[0;30;47m|\033[2;30;47m     ˉˉˉˉˉˉˉˉˉˉˉˉ \033[0;30;47m|\033[0;0;0m\n");
+
+    x = x + 2;
+    cont++;
+    printf("\033[0m\n");
+
+    if (cont == 3)
+    {
+        int key = 0;
+        while (1)
+        {
+            key = returnKey();
+            if (key == ESC || key == ENTER)
+            {
+                break;
+            }
+            if (key == 's')
+            {
+                printf("\033[0;0;0m\n");
+                printBackground();
+                break;
+            }
+        }
+    }
+}
+
+/* 判断二叉搜索树度为2 */
+static int balanceBinarySearchTreeNodeHasTwochildrens(AVLTreeNode *node)
+{
+    return (node->left != NULL) && (node->right != NULL);
+}
+
+/* 判断二叉搜索树度为1 */
+static int balanceBinarySearchTreeNodeHasOnechildren(AVLTreeNode *node)
+{
+    return ((node->left == NULL) && (node->right != NULL)) || ((node->left != NULL) && (node->right == NULL));
+}
+
+/* 判断二叉搜索树度为0 */
+static int balanceBinarySearchTreeNodeIsLeaf(AVLTreeNode *node)
+{
+    return (node->left == NULL) && (node->right == NULL);
+}
+
+/* 获取当前结点的前驱结点 */
+/* 中序遍历到结点的前一个结点 */
+static AVLTreeNode * bstreeNodePreDecessor(AVLTreeNode *node)
+{
+    if (node->left != NULL)
+    {
+        /* 前驱结点是在左子树的右子树的右子树... */
+        AVLTreeNode *travelNode = node->left;
+        while (travelNode->right != NULL)
+        {
+            travelNode = travelNode->right;
+        }
+        return travelNode;
+    }
+
+    /* 程序执行到这个地方 说明一定没有左子树。 那就需要向父结点找 */
+    while(node->parent != NULL && node == node->parent->left)
+    {
+        node = node->parent;
+    }
+    /* node->parent == NULL. */
+    /* node == node->parent->right. */
+    return node->parent;
+}
+
+/* 删除结点之后要做的事 */
+static int removeNodeAfter(balanceBinarySearchTree *pBstree, AVLTreeNode *node)
+{
+    /* 时间复杂度是O(logN) */
+    while ( (node = node->parent) != NULL)
+    {
+        /* 程序执行到这里面的时候, 一定不止一个结点. */
+        if (AVLTreeNodeIsBalanced(node))
+        {
+            /* 如果结点是平衡的. 那就更新高度. */
+            AVLTreeNodeUpdateHeight(node);
+        }
+        else
+        {
+            /* node是最低不平衡结点 */
+            /* 调整平衡 */
+            AVLTreeNodeAdjustBalance(pBstree, node);
+        }
+    }
+    return ON_SUCCESS;
+}
+
+/* 删除结点 */
+int balanceBinarySearchTreeDeleteNode(balanceBinarySearchTree *pBstree, AVLTreeNode *node)
+{
+    if (node == NULL)
+    {
+        return NULL_PTR;
+    }
+
+    /* 树的结点减一 */
+    (pBstree->size)--;
+
+    if (balanceBinarySearchTreeNodeHasTwochildrens(node))
+    {
+        /* 找到前驱结点 */
+        AVLTreeNode * preNode = bstreeNodePreDecessor(node);
+        node->data = preNode->data;
+        node = preNode;
+    }
+
+    /* 程序执行到这里. 要删除的结点要么是度为1 要么是度为0. */
+
+    /* 假设node结点是度为1的。它的child要么是左要么是右. */
+    /* 假设node结点是度为0的, */
+    AVLTreeNode * child = node->left != NULL ? node->left : node->right;
+
+    AVLTreeNode *delNode = NULL;
+    if (child)
+    {
+        /* 度为1 */
+        child->parent = node->parent;
+        if (node->parent == NULL)
+        {
+            /* 度为1 且 它是根结点 */
+            pBstree->root = child;
+
+            delNode = node;
+            /* 删除的结点 */
+            removeNodeAfter(pBstree, delNode);
+        }
+        else
+        {
+            /* 度为1 且 它不是根结点 */
+            if (node == node->parent->left)
+            {
+                node->parent->left = child;
+            }
+            else if (node == node->parent->right)
+            {
+                node->parent->right = child;
+            }
+
+            delNode = node;
+            /* 删除的结点 */
+            removeNodeAfter(pBstree, delNode);
+        }
+    }
+    else
+    {
+        /* 度为0 */
+        if (node->parent == NULL)
+        {
+            /* 度为0 且是根结点 */
+            delNode = node;
+            /* 删除的结点 */
+            removeNodeAfter(pBstree, delNode);
+        }
+        else
+        {
+            if (node == node->parent->left)
+            {
+                node->parent->left = NULL;
+            }
+            else if (node == node->parent->right)
+            {
+                node->parent->right = NULL;
+            }
+
+
+            delNode = node;
+            /* 删除的结点 */
+            removeNodeAfter(pBstree, delNode);
+            #if 0
+            if (node)
+            {
+                free(node);
+                node = NULL;
+            }
+            #endif
+        }
+       
+    }
+
+    if (delNode)
+    {
+        free(delNode);
+        delNode = NULL;
+    }
+    
+    return ON_SUCCESS;
+}
+
+/* 二叉搜索树的销毁 */
+int balanceBinarySearchTreeDestroy(balanceBinarySearchTree *pBstree)
+{
+    if (pBstree == NULL)
+    {
+        return NULL_PTR;
+    }
+
+    queue *pQueue = NULL;
+    queueInit(&pQueue);
+
+    /* 将根结点入队 */
+    queuePush(pQueue, pBstree->root);
+    AVLTreeNode *travelNode = NULL;
+    while (pQueue->len != 0)
+    {
+        queueGetHeadVal(pQueue, (void **)&travelNode);
+        queuePop(pQueue);
+
+        if (travelNode->left != NULL)
+        {
+            queuePush(pQueue, travelNode->left);
+        }
+
+        if (travelNode->right != NULL)
+        {
+            queuePush(pQueue, travelNode->right);
+        }
+    
+        /* 最后释放 */
+        if (travelNode)
+        {
+            free(travelNode);
+            travelNode = NULL;
+        }
+    }
+    /* 释放队列 */
+    queueDestroy(pQueue);
+
+    /* 释放树 */
+    if (pBstree)
+    {
+        free(pBstree);
+        pBstree = NULL;
+    }
+    return ON_SUCCESS;
+}
+

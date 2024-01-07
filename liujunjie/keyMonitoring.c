@@ -88,33 +88,3 @@ int returnKey()      //每0.5秒返回一次按键输入
         }
     }
 }
-
-int putKey()    //无阻塞回显按键输入
-{
-    char key = 0;
-    while (key != 'z')
-    {
-        key = returnKey();
-        printf("监测到键盘输入%c\n", key);
-    }
-
-    return 0;
-}
-
-int leftOrRight()       //无阻塞按a输出左，按d输出右
-{
-    int key = 0;
-    while (key != '\n')
-    {   
-        key = returnKey();
-        if (key == 'a')
-        {
-                printf("左\n");
-        }
-        if (key == 'd')
-        {
-                printf("右\n");
-        }
-    }
-    return 0;
-}

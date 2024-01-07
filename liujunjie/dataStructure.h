@@ -48,7 +48,7 @@ typedef struct balanceBinarySearchTree
 /* 队列的结点 */
 typedef struct queueNode
 {
-    ELEMENTTYPE data;
+    AVLTreeNode * data;
     /* 指向下一个结点的指针 */
     struct queueNode *next;
 } queueNode;
@@ -61,5 +61,26 @@ typedef struct queue
     /* 队列的长度 */
     int len;
 } queue;
+
+
+
+/* 函数比较器 */
+int compareFunc(contacts *arg1, AVLTreeNode *arg2);
+/* 平衡二叉搜索树初始化 */
+int balanceBinarySearchTreeInit(balanceBinarySearchTree **pBstree, int (*compareFunc)(contacts *arg1, AVLTreeNode *arg2));
+/* 创造树的新结点 */
+AVLTreeNode *createBSTreeNewNode(ELEMENTTYPE val, AVLTreeNode *parent);
+/* 平衡二叉搜索树的插入 */
+int balanceBinarySearchTreeInsert(balanceBinarySearchTree *pBstree, contacts *newContacts);
+/* 按照姓名排序，显示所有联系人 */
+int displayAllContactInfo(balanceBinarySearchTree *pBstree);
+/* 根据指定的值获取二叉搜索树的结点 */
+AVLTreeNode * baseAppointValGetAVLTreeNode(balanceBinarySearchTree *pBstree, char *data);
+/* 打印本结点的数据 */
+void printThisData(AVLTreeNode *node);
+/* 删除结点 */
+int balanceBinarySearchTreeDeleteNode(balanceBinarySearchTree *pBstree, AVLTreeNode *node);
+/* 二叉搜索树的销毁 */
+int balanceBinarySearchTreeDestroy(balanceBinarySearchTree *pBstree);
 
 #endif

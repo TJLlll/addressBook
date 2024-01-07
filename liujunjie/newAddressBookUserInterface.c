@@ -7,7 +7,7 @@
 #define NOUNDERLINE 0   //字体正常显示
 #define UNDERLINE 2     //字体虚化显示
 #define ADDCONTACTS '1'   //新增联系人
-#define SEARCHCONTACTS '2'   //查找联系人
+#define SEARCHCONTACTS '2'   //查看联系人
 #define DELECONTACTS '3'   //删除联系人
 #define CHANGECONTACTS '4'   //修改联系人
 #define EXITPROCEDURE '5'   //退出程序
@@ -84,6 +84,7 @@ int numsIsEmpty(int nums)
     return nums == 0 ? UNDERLINE : NOUNDERLINE;
 }
 
+#if 0   //功能菜单1.0
 int funcManu()      //功能菜单
 {
     system("clear");
@@ -113,8 +114,7 @@ int funcManu()      //功能菜单
 
     return 0;
 }
-
-
+#endif
 
 int illegalInputDisplay()   //输入了非法值的显示
 {
@@ -129,7 +129,8 @@ int illegalInputDisplay()   //输入了非法值的显示
     sleep(2);
 }
 
-int choiseFunc()    //选择功能
+#if 0       //选择功能1.0
+int choiseFunc()    
 {
     #if 1
     fflush(stdin);      //使用该函数清空缓存区无法防止播放开机动画时非法键入所产生的bug
@@ -171,4 +172,47 @@ int choiseFunc()    //选择功能
         case EXITPROCEDURE:
             exit(0);  
     }
+}
+#endif
+
+/* 新增联系人成功界面 */
+void newSuccessfullyAdded()
+{
+    system("clear");//清屏
+    print_();
+    printspace(4);
+    printf("\033[0;30;47m\t|  新增联系人成功  |\n");
+    printspace(4);
+    print_();
+    printf("\033[0;0;0m\n");
+    sleep(2);
+    getchar();
+}
+
+/* 修改联系人成功界面 */
+void newSuccessfullyChanged()
+{
+    system("clear");//清屏
+    print_();
+    printspace(4);
+    printf("\033[0;30;47m\t|  修改联系人成功  |\n");
+    printspace(4);
+    print_();
+    printf("\033[0;0;0m\n");
+    sleep(1.75);
+}
+
+/* 联系人为空提示界面 */
+void IsEmptyAddressBook()
+{
+    system("clear");//清屏
+    print_();
+    printspace(2);
+    printf("\033[0;0;0m\t|\033[0;30;47m  联系人列表为空  \033[0;0;0m|\n");
+    printspace(1);
+    printf("\033[0;0;0m\t|\033[0;30;47m  无法进行该操作  \033[0;0;0m|\n");
+    printspace(2);
+    print_();
+    printf("\033[0;0;0m\n");
+    sleep(2);
 }
