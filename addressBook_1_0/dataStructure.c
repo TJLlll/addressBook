@@ -700,7 +700,7 @@ void printThisData(AVLTreeNode *node)
     //printf("\033[3;37;40m详情");        //选择这个
     //printf("\n\t\033[0;30;47m|\033[2;30;47m     ˉˉˉˉˉˉˉˉˉˉˉˉ \033[0;30;47m|\033[0;0;0m\n");
 
-     printf("\033[%d;10H\033[0;30;47m", x + cont + 1);   //设置光标位置显示“号码”
+    printf("\033[%d;10H\033[0;30;47m", x + cont + 1);   //设置光标位置显示“号码”
     printf("\033[3;30;47m号码：");
     printf("\033[0;30;47m %s   ", node->data->phoneNumber);
    // printf("\n\t\033[0;30;47m|\033[2;30;47m     ˉˉˉˉˉˉˉˉˉˉˉˉ \033[0;30;47m|\033[0;0;0m\n");
@@ -723,6 +723,8 @@ void printThisData(AVLTreeNode *node)
             {
                 printf("\033[0;0;0m\n");
                 printBackground();
+                x = X_INITPOS;
+                cont = 0;
                 break;
             }
         }
