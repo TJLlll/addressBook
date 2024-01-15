@@ -29,18 +29,15 @@ static void readRecord(balanceBinarySearchTree *pBstree, AVLTreeNode *root)     
             perror("malloc error");
         }
         int reallen = read(fd, newContacts->name, NAME_SIZE);
-        printf("name reallen:%d\n", reallen);getchar();
 
         if (reallen == 0 || newContacts->name == "\n" || newContacts->name == "\0")
         {
-            printf("36\n");getchar();
             free(newContacts);
             newContacts = NULL;
             break;
         }
 
         reallen = read(fd, newContacts->phoneNumber, PHONENUMBER_SIZE);
-        printf("phone reallen:%d\n", reallen);getchar();
         lseek(fd, 1, SEEK_CUR);
         if (reallen == 0 || newContacts->name == "\n" || newContacts->name == "\0")
         {
