@@ -327,7 +327,7 @@ int balanceBinarySearchTreeInit(balanceBinarySearchTree **pBstree, int (*compare
 }
 
 /* 创造树的新结点 */
-AVLTreeNode *createBSTreeNewNode(ELEMENTTYPE val, AVLTreeNode *parent)
+AVLTreeNode *createBSTreeNewNode(contacts *val, AVLTreeNode *parent)
 {
     /* 分配根结点 */
     AVLTreeNode * newAVLNode = (AVLTreeNode *)malloc(sizeof(AVLTreeNode) * 1);
@@ -1017,6 +1017,7 @@ int balanceBinarySearchTreeDestroy(balanceBinarySearchTree *pBstree)
         /* 最后释放 */
         if (travelNode)
         {
+            free(travelNode->data);
             free(travelNode);
             travelNode = NULL;
         }
