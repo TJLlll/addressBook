@@ -260,7 +260,7 @@ int enterFunc(int flag, balanceBinarySearchTree* addressGetData)    //选择进�
         case EXIT :
             reWrite();  //关闭程序时向文件中重新写入数据，防止重复写入之前保存过的数据
             saveInfo(addressGetData->root);    //将联系人信息保存到文件
-            balanceBinarySearchTreeDestroy(addressGetData);   //销毁树（未完成）
+            balanceBinarySearchTreeDestroy(addressGetData);   //销毁树
             byeBye();   
     }
 }

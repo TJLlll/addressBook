@@ -123,7 +123,6 @@ static int DoubleLinkListAppointPosInsert(queue * pList, int pos, ELEMENTTYPE va
     {
         return NULL_PTR;
     }
-    /* todo */
     /* 封装结点 */
     queueNode * newNode = (queueNode *)malloc(sizeof(queueNode) * 1);
     if (newNode == NULL)
